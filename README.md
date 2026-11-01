@@ -1,5 +1,8 @@
 # safari-debug
 
+> [!WARNING]
+> **All of the code in this project was written by AI.** Use it entirely at your own risk.
+
 Debug Safari on a USB-connected iPhone from Linux, without a Mac.
 
 `safari-debug` is a single Rust binary that:
@@ -87,15 +90,15 @@ the connected device's iOS version, so you normally do not need to care.
 
 ## Endpoints
 
-| Path | Purpose |
-| --- | --- |
-| `/` | Device and tab list |
-| `/api/devices` | JSON snapshot of devices and pages |
-| `/api/refresh` | Ask the device to refresh its page listing |
-| `/json` | iwdp-style device list |
-| `/json/list` | iwdp-style page list |
-| `/inspector/<udid>/<page>/` | WebKit Inspector UI |
-| `/ws/<udid>/<page>` | Browser ↔ device WebSocket bridge |
+| Path                        | Purpose                                    |
+| --------------------------- | ------------------------------------------ |
+| `/`                         | Device and tab list                        |
+| `/api/devices`              | JSON snapshot of devices and pages         |
+| `/api/refresh`              | Ask the device to refresh its page listing |
+| `/json`                     | iwdp-style device list                     |
+| `/json/list`                | iwdp-style page list                       |
+| `/inspector/<udid>/<page>/` | WebKit Inspector UI                        |
+| `/ws/<udid>/<page>`         | Browser ↔ device WebSocket bridge          |
 
 The WebSocket endpoint speaks the WebKit Inspector Protocol directly. The
 WebKit UI is served unmodified from the WebKit source tree, plus a small
