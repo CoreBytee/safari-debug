@@ -1,0 +1,31 @@
+[package]
+name = "safari-debug"
+version = "0.1.0"
+edition = "2021"
+description = "USB proxy and WebKit inspector UI for debugging Safari on iOS"
+license = "MIT"
+
+[[bin]]
+name = "safari-debug"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+axum = { version = "0.8", features = ["ws"] }
+clap = { version = "4", features = ["derive"] }
+dirs = "6"
+futures-util = "0.3"
+idevice = { version = "=0.1.68", default-features = false, features = ["usbmuxd", "rustls", "ring"] }
+mime_guess = "2"
+plist = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v4"] }
+
+[profile.release]
+lto = "thin"
+strip = true

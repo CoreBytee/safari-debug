@@ -1,0 +1,22 @@
+/* Browser compatibility fixes for the remote WebKit inspector. */
+.navigation-bar .item.button > img {
+    width: 16px;
+}
+
+/* The popover background is normally drawn with getCSSCanvasContext(), which
+   does not exist in Chromium/Firefox. */
+.popover {
+    background-color: var(--background-color-tertiary);
+}
+
+body:not(.mac-platform.monterey, .mac-platform.big-sur):not(.docked) {
+    --undocked-title-area-height: calc(0px / var(--zoom-factor));
+}
+
+.tab-bar > .tabs > .item {
+    border-top: none !important;
+}
+
+.tab-bar > .border.top {
+    display: none !important;
+}

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safari Debug</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0e1116;
+  --panel: #151a22;
+  --panel-2: #1b2230;
+  --border: #283142;
+  --text: #e7edf6;
+  --muted: #8b98ad;
+  --accent: #5aa9ff;
+  --accent-2: #7ee0c3;
+  --danger: #ff7a90;
+  --ok: #66d19e;
+  --shadow: 0 18px 50px rgba(0, 0, 0, .35);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 500px at 15% -10%, rgba(90, 169, 255, .16), transparent 60%),
+    radial-gradient(700px 400px at 95% 0%, rgba(126, 224, 195, .10), transparent 55%),
+    var(--bg);
+  color: var(--text);
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { width: min(1100px, calc(100% - 40px)); margin: 0 auto; padding: 34px 0 70px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 26px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.mark {
+  width: 38px; height: 38px; border-radius: 11px;
+  background: linear-gradient(145deg, var(--accent), #2f6fbf);
+  display: grid; place-items: center; color: #071018; font-weight: 900; font-size: 19px;
+  box-shadow: 0 8px 24px rgba(90, 169, 255, .35);
+}
+h1 { font-size: 21px; margin: 0; letter-spacing: -.02em; }
+.sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.actions { display: flex; align-items: center; gap: 10px; }
+button, .button {
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  border-radius: 10px; padding: 9px 13px; font: inherit; font-size: 13px; cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s;
+}
+button:hover, .button:hover { background: var(--panel-2); border-color: #3a4760; text-decoration: none; }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: .5; cursor: wait; }
+.dot { width: 8px; height: 8px; border-radius: 999px; background: var(--muted); display: inline-block; }
+.dot.ok { background: var(--ok); box-shadow: 0 0 12px rgba(102, 209, 158, .7); }
+.dot.bad { background: var(--danger); }
+.summary { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+.grid { display: grid; gap: 18px; }
+.device {
+  background: linear-gradient(180deg, rgba(255,255,255,.025), transparent), var(--panel);
+  border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden;
+}
+.device-head { display: flex; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--border); align-items: center; }
+.device-name { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.device-meta { color: var(--muted); font-size: 12px; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: #0f141c; border-radius: 999px; padding: 5px 9px; font-size: 11px; color: var(--muted); }
+.pill.ok { border-color: #23573f; color: #9ae7c1; background: #0d2118; }
+.pill.bad { border-color: #5a2733; color: #ffb1c0; background: #211017; }
+.pages { padding: 10px; display: grid; gap: 8px; }
+.page {
+  display: flex; align-items: center; justify-content: space-between; gap: 18px;
+  padding: 13px 14px; border-radius: 12px; border: 1px solid transparent;
+}
+.page:hover { background: var(--panel-2); border-color: var(--border); }
+.page-main { min-width: 0; }
+.page-title { font-weight: 650; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page-url { color: var(--muted); font-size: 12px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page-app { color: var(--muted); font-size: 11px; margin-top: 5px; }
+.inspect { flex: none; background: linear-gradient(180deg, #2e7bd6, #2465b3); border-color: #3d8bea; box-shadow: 0 7px 18px rgba(46, 123, 214, .28); font-weight: 600; }
+.inspect:hover { background: linear-gradient(180deg, #3a89e6, #2a70c2); }
+.empty { padding: 30px 20px; color: var(--muted); text-align: center; font-size: 14px; }
+.empty strong { color: var(--text); }
+.hint { border: 1px dashed var(--border); border-radius: 16px; padding: 26px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.hint code { color: var(--text); background: #0b0f15; border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; }
+.error { border: 1px solid #5a2733; background: #211017; color: #ffb1c0; border-radius: 14px; padding: 14px 16px; font-size: 13px; }
+.error-detail { display: block; margin-top: 12px; color: var(--muted); font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+footer { color: var(--muted); font-size: 12px; margin-top: 26px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid #42506a; border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; margin-right: 7px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 620px) {
+  .wrap { width: min(100% - 24px, 1100px); padding-top: 20px; }
+  header { align-items: flex-start; }
+  .device-head { align-items: flex-start; flex-direction: column; }
+  .page { align-items: flex-start; flex-direction: column; }
+  .inspect { width: 100%; text-align: center; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="mark">S</div>
+      <div>
+        <h1>Safari Debug</h1>
+        <div class="sub">USB proxy + WebKit inspector for iOS Safari</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="button" href="/json" target="_blank" rel="noreferrer">JSON</a>
+      <button id="refresh" type="button">Refresh</button>
+    </div>
+  </header>
+
+  <p class="summary"><span id="status-dot" class="dot"></span><span id="status-text">Connecting to usbmuxd…</span></p>
+  <main id="devices" class="grid"></main>
+
+  <footer>
+    <span>Keep this page open while debugging. Web Inspector must be enabled on the iPhone.</span>
+    <span>safari-debug</span>
+  </footer>
+</div>
+
+<script>
+const devicesEl = document.getElementById('devices');
+const statusText = document.getElementById('status-text');
+const statusDot = document.getElementById('status-dot');
+const refreshButton = document.getElementById('refresh');
+let refreshing = false;
+let lastFingerprint = '';
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[ch]);
+}
+
+function inspectorUrl(device, page) {
+  const udid = encodeURIComponent(device.udid);
+  const ws = `${location.host}/ws/${udid}/${page.pageNum}`;
+  return `/inspector/${udid}/${page.pageNum}/?ws=${encodeURIComponent(ws)}`;
+}
+
+function prettyUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return parsed.host + parsed.pathname + parsed.search + parsed.hash;
+  } catch {
+    return url || '(no URL)';
+  }
+}
+
+function render(data) {
+  const devices = data.devices || [];
+  const usbmuxd = data.usbmuxd || { available: true };
+  const fingerprint = JSON.stringify(data);
+  if (fingerprint === lastFingerprint) return;
+  lastFingerprint = fingerprint;
+
+  if (!usbmuxd.available) {
+    statusDot.className = 'dot bad';
+    statusText.textContent = 'usbmuxd is not available';
+    devicesEl.innerHTML = `
+      <div class="hint">
+        <strong>usbmuxd is not running.</strong><br>
+        Reconnect the iPhone (usbmuxd normally starts automatically), or start it manually:<br>
+        <code>sudo systemctl start usbmuxd</code>
+        <span class="error-detail">${escapeHtml(usbmuxd.error || 'connection refused')}</span>
+      </div>`;
+    return;
+  }
+
+  if (!devices.length) {
+    statusDot.className = 'dot bad';
+    statusText.textContent = 'No iOS device found';
+    devicesEl.innerHTML = `
+      <div class="hint">
+        <strong>Connect an iPhone over USB.</strong><br>
+        Unlock the phone, tap <em>Trust</em> if prompted, and keep it unlocked.<br>
+        Then open <code>Settings → Safari → Advanced → Web Inspector</code> and open a page in Safari.
+      </div>`;
+    return;
+  }
+
+  const pageCount = devices.reduce((sum, d) => sum + d.pages.length, 0);
+  const connected = devices.some(d => d.connected);
+  if (!connected) {
+    statusDot.className = 'dot';
+    statusText.textContent = `${devices.length} device${devices.length === 1 ? '' : 's'} · connecting to webinspector…`;
+  } else {
+    statusDot.className = 'dot ok';
+    statusText.textContent = `${devices.length} device${devices.length === 1 ? '' : 's'} · ${pageCount} debuggable page${pageCount === 1 ? '' : 's'}`;
+  }
+
+  devicesEl.innerHTML = devices.map(device => {
+    const pages = device.pages.length
+      ? `<div class="pages">${device.pages.map(page => `
+          <div class="page">
+            <div class="page-main">
+              <div class="page-title">${escapeHtml(page.title || '(untitled)')}</div>
+              <div class="page-url">${escapeHtml(prettyUrl(page.url))}</div>
+              <div class="page-app">${escapeHtml(page.appName || page.appId)} · page ${page.pageNum}</div>
+            </div>
+            <a class="button inspect" href="${escapeHtml(inspectorUrl(device, page))}" target="_blank" rel="noreferrer">Inspect</a>
+          </div>`).join('')}</div>`
+      : `<div class="empty">
+           <strong>No Safari pages yet.</strong><br>
+           Open a web page in Safari on this iPhone. If this stays empty, make sure
+           <code>Settings → Safari → Advanced → Web Inspector</code> is enabled.
+         </div>`;
+
+    return `
+      <section class="device">
+        <div class="device-head">
+          <div>
+            <div class="device-name">${escapeHtml(device.name || device.udid)}</div>
+            <div class="device-meta">
+              <span>iOS ${escapeHtml(device.osVersion || 'unknown')}</span>
+              <span>${escapeHtml(device.udid)}</span>
+            </div>
+          </div>
+          <span class="pill ${device.connected ? 'ok' : 'bad'}">
+            <span class="dot ${device.connected ? 'ok' : 'bad'}"></span>
+            ${escapeHtml(device.status || (device.connected ? 'connected' : 'disconnected'))}
+          </span>
+        </div>
+        ${pages}
+      </section>`;
+  }).join('');
+}
+
+async function load() {
+  try {
+    const response = await fetch('/api/devices', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    render(data);
+  } catch (error) {
+    statusDot.className = 'dot bad';
+    statusText.textContent = 'Cannot reach the proxy';
+    devicesEl.innerHTML = `<div class="error">Could not load <code>/api/devices</code>: ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+refreshButton.addEventListener('click', async () => {
+  if (refreshing) return;
+  refreshing = true;
+  refreshButton.disabled = true;
+  refreshButton.textContent = 'Refreshing…';
+  try {
+    await fetch('/api/refresh', { method: 'POST' });
+    lastFingerprint = '';
+    await load();
+  } finally {
+    refreshing = false;
+    refreshButton.disabled = false;
+    refreshButton.textContent = 'Refresh';
+  }
+});
+
+load();
+setInterval(load, 1500);
+</script>
+</body>
+</html>
